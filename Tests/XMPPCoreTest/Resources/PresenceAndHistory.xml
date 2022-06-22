@@ -1,0 +1,67 @@
+<body xmlns='http://jabber.org/protocol/httpbind'>
+    <presence from='100001648467788039353@chat-core.com/100056000000001'
+        to='100056000000001@chat-core.com/ios'>
+        <x xmlns='http://jabber.org/protocol/muc#user'>
+            <item affiliation='member'/>
+            <status code='110'/>
+        </x>
+    </presence>
+    <iq from='100056000000001@chat-core.com/ios'
+        to='100056000000001@chat-core.com/ios'
+        id='room-messages-history'
+        type='result'>
+        <query xmlns='http://jabber.org/protocol/messages'>
+            <item>
+                <from>100056000000001@chat-core.com</from>
+                <body>
+                    Hola,
+                    Text with linebreaks
+                </body>
+                <metadata></metadata>
+                <attachment></attachment>
+                <attention>false</attention>
+                <isRead>true</isRead>
+                <time>2022-03-28T11:43:12.294Z</time>
+            </item>
+            <item>
+                <from>22200034695667@chat-core.com</from>
+                <body>No te entiendo, te paso con un agente</body>
+                <metadata></metadata>
+                <attachment></attachment>
+                <attention>false</attention>
+                <isRead>true</isRead>
+                <time>2022-03-28T11:43:12.678Z</time>
+            </item>
+            <item>
+                <from>0@chat-core.com</from>
+                <body>El cliente ha abandonado la conversación.</body>
+                <metadata></metadata>
+                <attachment></attachment>
+                <attention>false</attention>
+                <isRead>true</isRead>
+                <time>2022-03-28T11:43:19.166Z</time>
+            </item>
+            <item>
+                <from>100056000000001@chat-core.com</from>
+                <body>Hola</body>
+                <metadata></metadata>
+                <attachment></attachment>
+                <attention>false</attention>
+                <isRead>true</isRead>
+                <time>2022-03-28T11:45:11.826Z</time>
+            </item>
+            <item>
+                <from>0@chat-core.com</from>
+                <body>Perdona que te hagamos esperar. Todos nuestos agentes están ocupados.</body>
+                <metadata></metadata>
+                <attachment></attachment>
+                <attention>false</attention>
+                <isRead>true</isRead>
+                <time>2022-03-28T11:49:58.076Z</time>
+            </item>
+        </query>
+    </iq>
+</body>
+
+
+

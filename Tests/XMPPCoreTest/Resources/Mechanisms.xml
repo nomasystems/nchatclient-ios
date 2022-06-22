@@ -1,0 +1,20 @@
+<body xmlns='http://jabber.org/protocol/httpbind'
+      authid='272C25CD'
+      xmlns:xmpp='urn:xmpp:xbosh'
+      xmlns:stream='http://etherx.jabber.org/streams'
+      xmpp:version='1.0'
+      sid='e54bc0277a2f0f29b99c2ea4de28def1f65c8a68'
+      wait='20'
+      requests='2'
+      inactivity='30'
+      maxpause='120'
+      polling='20'
+      ver='1.6'
+      from='chat-core.com'
+      secure='true'>
+    <stream:features xmlns:stream='http://etherx.jabber.org/streams'>
+        <mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>
+            <mechanism>PLAIN</mechanism>
+        </mechanisms>
+    </stream:features>
+</body>
