@@ -284,9 +284,13 @@ class Client: XMPPClientBase {
             guard let self = self else {
                 completion(didFindRoom)
                 return }
-            result.data.first?.forEachElement(completion: { e in
+            result.data.first?.forEachElement(completion: { [weak self] e in
+                guard let self = self else { return }
+
                 guard case let .node(_, .MUC_ROOMS, atts, _) = e,
                       let rawRoomJid = atts["jid"],
+                      let workgroupJid = atts["owner"],
+                      workgroup.jid.description == workgroupJid,
                       let roomJid = XMPPJid(string: rawRoomJid),
                       !self.rooms.contains(where: { $0.jid == roomJid }) else {
                           return }
