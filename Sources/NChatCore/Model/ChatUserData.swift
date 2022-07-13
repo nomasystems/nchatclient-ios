@@ -23,7 +23,7 @@ public struct ChatUserData {
     public let productSku: String?
     /// Identifier of the user's order. Metadata.
     public let orderId: String?
-    /// Topic of the chat
+    /// Topic of the chat. Metadata.
     public let topic: String?
     /// Jid used to connect to the chat.
     ///
