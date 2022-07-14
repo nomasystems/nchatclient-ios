@@ -394,6 +394,8 @@ extension Chat: RoomDelegate {
             if state != .active && occupant.role == .agent {
                 state = .active
                 systemMessage = nil
+            } else if occupant.role == .user {
+                room.updateMetadata(userData: configuration.userData, completion: { _ in })
             }
         case .none, .outcast:
             if occupant.role == .user {

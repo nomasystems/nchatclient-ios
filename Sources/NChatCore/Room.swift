@@ -226,6 +226,24 @@ public class Room {
         XMPPLog("ROOM", "Sending message to \(jid) (\(message.id))")
     }
 
+    func updateMetadata(userData: ChatUserData, completion: @escaping (XMPPIq) -> Void) {
+        guard let workgroupJid = workgroup?.jid else { return }
+        guard let contactJid = client?.jid else { return }
+
+        let to = XMPPJid(jid: workgroupJid, resource: contactJid.username)
+
+        let crm = userData.crmXmlMetadata(contactJid: contactJid)
+        let iq = XMPPIq(type: .set, id: "update-metadata-1", to: to, data: [
+            XMLParserEl.node(name: "communication-metadata", namespace: .WORKGROUP,
+                             children: [crm])
+        ])
+
+        client?.send(iq: iq) { result in
+            completion(result)
+        }
+        XMPPLog("ROOM", "Updating metadata")
+    }
+
     /// Appends attachment in base64 format to message body.
     func append(attachment: ChatAttachment, to body: inout [XMLParserEl], and data: inout [XMLParserEl]) {
         if let title = attachment.title {
