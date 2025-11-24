@@ -3,7 +3,6 @@
 import Foundation
 import os
 import XMPPCore
-import UIKit
 
 /// Additional authentication mechanisms that consumer can include optionally.
 ///
@@ -19,6 +18,14 @@ public protocol ChatDelegate: AnyObject {
     func onState(_ state: ChatState)
     func onStatus(online: Bool)
     func onAgentChatState(_ state: Chat.AgentState?)
+}
+
+/// Protocol for handling app lifecycle events. Implement this to manage background task behavior.
+public protocol ChatLifecycleDelegate: AnyObject {
+    /// Called when chat needs to start a background task. Return a token to track it.
+    func chatWillStartBackgroundTask(_ chat: Chat, expirationHandler: @escaping () -> Void) -> String?
+    /// Called when chat needs to end a background task.
+    func chatWillEndBackgroundTask(_ chat: Chat, token: String?)
 }
 
 public protocol ChatMessagesDelegate: AnyObject {
@@ -52,9 +59,9 @@ open class Chat {
             notifyStateObservers()
             delegate?.onState(state)
 
-            if (state == .closing || state == .closed) && backgroundTask != .invalid {
-                UIApplication.shared.endBackgroundTask(backgroundTask)
-                backgroundTask = .invalid
+            if (state == .closing || state == .closed) && backgroundTaskToken != nil {
+                lifecycleDelegate?.chatWillEndBackgroundTask(self, token: backgroundTaskToken)
+                backgroundTaskToken = nil
             }
         }
     }
@@ -91,16 +98,6 @@ open class Chat {
     public init(configuration: ChatConfiguration) {
         self.configuration = configuration
         client = Client(configuration: configuration)
-
-        let dns = NotificationCenter.default
-        dns.addObserver(self,
-                        selector: #selector(applicationDidEnterBackground(_:)),
-                        name: UIApplication.didEnterBackgroundNotification,
-                        object: nil)
-        dns.addObserver(self,
-                        selector: #selector(applicationWillEnterForeground(_:)),
-                        name: UIApplication.willEnterForegroundNotification,
-                        object: nil)
         client.delegate = self
         client.authenticationDelegate = self
     }
@@ -194,12 +191,13 @@ open class Chat {
     }
 
     private var client: Client
-    private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    private var backgroundTaskToken: String?
     private let errorLog = OSLog(subsystem: "com.nomasystems.nmachatcoreui",
                                  category: "Error")
     public weak var delegate: ChatDelegate?
     public weak var messagesDelegate: ChatMessagesDelegate?
     public weak var authenticationDelegate: ChatAuthenticationDelegate?
+    public weak var lifecycleDelegate: ChatLifecycleDelegate?
     private(set) public weak var room: Room?
     public var userInput: String = ""
 
@@ -229,25 +227,28 @@ open class Chat {
 }
 
 extension Chat {
-    // MARK: - Observer callbacks
-    @objc func applicationDidEnterBackground(_ notification: AnyObject) {
+    // MARK: - Lifecycle methods (call from your app's lifecycle handlers)
+
+    /// Call this when app enters background. Starts a background task if lifecycleDelegate is set.
+    public func applicationDidEnterBackground() {
         guard state != .initialized, state != .closed else { return }
-        backgroundTask = UIApplication.shared.beginBackgroundTask { [weak self] in
+        backgroundTaskToken = lifecycleDelegate?.chatWillStartBackgroundTask(self) { [weak self] in
             guard let strongSelf = self else { return }
-            guard strongSelf.backgroundTask != .invalid else { return }
-            let taskId = strongSelf.backgroundTask
-            strongSelf.backgroundTask = .invalid
+            guard strongSelf.backgroundTaskToken != nil else { return }
+            let token = strongSelf.backgroundTaskToken
+            strongSelf.backgroundTaskToken = nil
             strongSelf.close(leavePermanently: false) {
                 strongSelf.systemMessage = SystemMessage(type: .closedInactivity)
-                UIApplication.shared.endBackgroundTask(taskId)
+                strongSelf.lifecycleDelegate?.chatWillEndBackgroundTask(strongSelf, token: token)
             }
         }
     }
 
-    @objc func applicationWillEnterForeground(_ notification: AnyObject) {
-        guard backgroundTask != .invalid else { return }
-        UIApplication.shared.endBackgroundTask(backgroundTask)
-        backgroundTask = .invalid
+    /// Call this when app enters foreground. Ends background task and sets room available.
+    public func applicationWillEnterForeground() {
+        guard backgroundTaskToken != nil else { return }
+        lifecycleDelegate?.chatWillEndBackgroundTask(self, token: backgroundTaskToken)
+        backgroundTaskToken = nil
         room?.set(available: true, fetchHistory: false)
     }
 

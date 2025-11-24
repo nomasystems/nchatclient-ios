@@ -33,6 +33,10 @@ let package = Package(
             name: "XMPPCoreTest",
             dependencies: ["XMPPCore"],
             resources: [.process("Resources")]
+        ),
+        .testTarget(
+            name: "NChatCoreIntegrationTest",
+            dependencies: ["NChatCore", "XMPPCore"]
         )
     ]
 )
